@@ -25,4 +25,22 @@ export class CoursesService {
     findOne(id: number): Course | undefined {
         return this.courses.find((course) => course.id === id);
     }
+
+    create(input: CreateCourseInput): Course {
+        const course: Course = {
+            id: Math.max(0,...this.courses.map(Item.id)) + 1,
+            title: input.title,
+            level: input.level,
+        };
+    }
+
+    remove(id: number): Course | undefinded {
+        const index = this.courses.findIndex((course) => course.id === id);
+        if (index === -1) {
+            return undefined;
+        }
+
+        const [removedCourse] = this.courses.splice(index, 1);
+        return removedCourse;
+    }
 }

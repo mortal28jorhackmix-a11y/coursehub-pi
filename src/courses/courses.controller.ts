@@ -14,5 +14,10 @@ export class CoursesController {
     findOne(@Param('id') id: string) {
         return this.coursesService.findOne(Number(id));
     }
-}
 
+    @Post()
+    create(@Body ()body: { title: string, level: string}) {
+        return this.coursesService.create(body);
+    }
+
+} hacer patch y el otro y tmb controoler terminar.
