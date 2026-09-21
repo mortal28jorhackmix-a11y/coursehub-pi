@@ -4,11 +4,7 @@ import { EstudianteService } from './estudiante.service.js';
 
 @Module({
   controllers: [EstudianteController],
-  providers: [EstudianteService]
-})
-export class EstudianteModule {}
-
-@Module({
-  controllers: [EstudianteController],
   providers: [EstudianteService],
   exports: [EstudianteService],
+})
+export class EstudianteModule {}
