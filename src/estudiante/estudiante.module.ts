@@ -7,3 +7,9 @@ import { EstudianteService } from './estudiante.service.js';
   providers: [EstudianteService]
 })
 export class EstudianteModule {}
+
+@Module({
+  controllers: [EstudianteController],
+  providers: [EstudianteService],
+  exports: [EstudianteService],
+})
