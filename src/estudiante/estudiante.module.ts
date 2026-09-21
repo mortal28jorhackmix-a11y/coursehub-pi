@@ -12,4 +12,3 @@ export class EstudianteModule {}
   controllers: [EstudianteController],
   providers: [EstudianteService],
   exports: [EstudianteService],
-})
