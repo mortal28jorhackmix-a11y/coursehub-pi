@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto.js';
-
+// Contiene la lógica de negocio central
 type Course = {
   id: number;
   title: string;

@@ -1,3 +1,4 @@
+// Gestiona las reglas de negocio de las matrículas.
 import {
   BadRequestException,
   ConflictException,
@@ -24,7 +25,7 @@ export class EnrollmentsService {
     private readonly coursesService: CoursesService,
   ) {}
 
-  create(dto: CreateEnrollmentDto): Enrollment {
+  create(dto: CreateEnrollmentDto): Enrollment { // dto crear inscripcines 
     const student = this.estudianteService.findOne(dto.studentId);
     if (!student) {
       throw new NotFoundException(`El estudiante ${dto.studentId} no existe`);
