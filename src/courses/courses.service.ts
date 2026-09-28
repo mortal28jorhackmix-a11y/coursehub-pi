@@ -22,9 +22,21 @@ export class CoursesService {
   private nextId = 4;
 
   private courses: Course[] = [
-    { id: 1, title: 'NestJS Fundamentals', level: 'beginner' },
-    { id: 2, title: 'REST APIs with NestJS', level: 'beginner' },
-    { id: 3, title: 'NestJS Architecture', level: 'intermediate' },
+    {
+      id: 1,
+      title: 'NestJS Fundamentals',
+      level: 'beginner',
+    },
+    {
+      id: 2,
+      title: 'REST APIs with NestJS',
+      level: 'beginner',
+    },
+    {
+      id: 3,
+      title: 'NestJS Architecture',
+      level: 'intermediate',
+    },
   ];
 
   findAll(level?: string): Course[] {
@@ -40,8 +52,13 @@ export class CoursesService {
   }
 
   create(createCourseDto: CreateCourseDto): Course {
-    const course = { id: this.nextId++, ...createCourseDto };
+    const course: Course = {
+      id: this.nextId++,
+      ...createCourseDto,
+    };
+
     this.courses.push(course);
+
     return course;
   }
 
@@ -53,6 +70,7 @@ export class CoursesService {
     }
 
     Object.assign(course, input);
+
     return course;
   }
 
@@ -64,6 +82,7 @@ export class CoursesService {
     }
 
     const [removedCourse] = this.courses.splice(index, 1);
+
     return removedCourse;
   }
 }
