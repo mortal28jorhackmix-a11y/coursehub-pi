@@ -31,7 +31,7 @@ export class EnrollmentsService {
       throw new NotFoundException(`El estudiante ${dto.studentId} no existe`);
     }
 
-    const course = this.coursesService.findOne(dto.courseId);
+    const course = this.coursesService.findOne(String(dto.courseId));
     if (!course) {
       throw new NotFoundException(`El curso ${dto.courseId} no existe`);
     }
@@ -76,7 +76,7 @@ export class EnrollmentsService {
   }
 
   findByCourse(courseId: number): Enrollment[] {
-    if (!this.coursesService.findOne(courseId)) {
+    if (!this.coursesService.findOne(String(courseId))) {
       throw new NotFoundException(`El curso ${courseId} no existe`);
     }
     return this.findAll(undefined, courseId);
