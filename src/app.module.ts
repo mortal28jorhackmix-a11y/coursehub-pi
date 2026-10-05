@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CoursesModule } from './courses/courses.module.js';
+import { EnrollmentsModule } from './enrollments/enrollments.module.js';
+import { EstudianteModule } from './estudiante/estudiante.module.js';
 
 @Module({
   imports: [
@@ -14,10 +16,13 @@ import { CoursesModule } from './courses/courses.module.js';
         username: config.getOrThrow('DATABASE_USER'),
         password: config.getOrThrow('DATABASE_PASSWORD'),
         database: config.getOrThrow('DATABASE_NAME'),
-        autoLoadEntities: true, synchronize: true,
+        autoLoadEntities: true,
+        synchronize: config.get('NODE_ENV', 'development') === 'development',
       }),
     }),
     CoursesModule,
+    EstudianteModule,
+    EnrollmentsModule,
   ],
 })
 export class AppModule {}
