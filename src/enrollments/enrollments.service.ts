@@ -3,6 +3,7 @@ import { FindOptionsWhere, Repository } from 'typeorm';
 import { Course } from '../courses/entities/course.entity.js';
 import { Student } from '../estudiante/entities/estudiante.entity.js';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto.js';
+import { EnrollmentsQueryDto } from './dto/query-enrollments.dto.js';
 import { Enrollment } from './entities/enrollment.entity.js';
 import {BadRequestException,ConflictException,Injectable,NotFoundException, } from '@nestjs/common';
 
@@ -10,7 +11,7 @@ import {BadRequestException,ConflictException,Injectable,NotFoundException, } fr
 export class EnrollmentsService {
   constructor(
     @InjectRepository(Enrollment)
-    private readonly enrollmentRepo: Repository<Enrollment>,
+    private readonly enrollmentsRepository: Repository<Enrollment>,
     @InjectRepository(Student)
     private readonly studentRepo: Repository<Student>,
     @InjectRepository(Course)
@@ -34,7 +35,7 @@ export class EnrollmentsService {
       );
     }
 
-    const duplicated = await this.enrollmentRepo.existsBy({
+    const duplicated = await this.enrollmentsRepository.existsBy({
       student: { id: dto.studentId },
       course: { id: dto.courseId },
     });
@@ -44,7 +45,33 @@ export class EnrollmentsService {
       );
     }
 
-    return this.enrollmentRepo.save(this.enrollmentRepo.create({ student, course }));
+    return this.enrollmentsRepository.save(
+      this.enrollmentsRepository.create({ student, course }),
+    );
+  }
+
+  // Semana 6 · Sesión 12
+  async search(query: EnrollmentsQueryDto) {
+    const qb = this.enrollmentsRepository
+      .createQueryBuilder('enrollment')
+      .leftJoinAndSelect('enrollment.student', 'student')
+      .leftJoinAndSelect('enrollment.course', 'course');
+
+    if (query.search) {
+      qb.andWhere('(student.name ILIKE :search OR course.title ILIKE :search)', {
+        search: `%${query.search.trim()}%`,
+      });
+    }
+    if (query.studentId) qb.andWhere('student.id = :studentId', { studentId: query.studentId });
+    if (query.courseId) qb.andWhere('course.id = :courseId', { courseId: query.courseId });
+    if (query.activeOnly === 'true') qb.andWhere('student.isActive = :active', { active: true });
+
+    qb.orderBy('enrollment.id', 'ASC')
+      .skip((query.page - 1) * query.limit)
+      .take(query.limit);
+
+    const [items, total] = await qb.getManyAndCount();
+    return { items, meta: { total, page: query.page, limit: query.limit } };
   }
 
   findAll(studentId?: number, courseId?: number): Promise<Enrollment[]> {
@@ -52,7 +79,7 @@ export class EnrollmentsService {
     if (studentId !== undefined) where.student = { id: studentId };
     if (courseId !== undefined) where.course = { id: courseId };
 
-    return this.enrollmentRepo.find({
+    return this.enrollmentsRepository.find({
       where,
       relations: { student: true, course: true },
       order: { id: 'ASC' },
@@ -74,14 +101,14 @@ export class EnrollmentsService {
   }
 
   async remove(id: number): Promise<Enrollment> {
-    const enrollment = await this.enrollmentRepo.findOne({
+    const enrollment = await this.enrollmentsRepository.findOne({
       where: { id },
       relations: { student: true, course: true },
     });
     if (!enrollment) {
       throw new NotFoundException(`La matricula ${id} no existe`);
     }
-    await this.enrollmentRepo.delete(id);
+    await this.enrollmentsRepository.delete(id);
     return enrollment;
   }
 }
