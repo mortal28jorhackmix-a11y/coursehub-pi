@@ -13,40 +13,39 @@ API REST desarrollada con NestJS para administrar cursos, estudiantes e inscripc
 
 ## Requisitos
 
-- Node.js y npm.
-- Una instancia de PostgreSQL.
+- Node.js 22 LTS y npm. Instala Node.js.
+- PostgreSQL instalado , y una base de datos para el proyecto (por ejemplo, `coursehub`).
 
-## Configuración y ejecución
+## Variables de entorno
 
-1. Instala las dependencias:
+La aplicación requiere estas variables para conectarse a PostgreSQL:
 
-   ```bash
-   npm install
-   ```
+| Variable | Requerida | Valor de ejemplo |
+| --- | --- | --- |
+| `DB_HOST` | Sí | `localhost` |
+| `DB_PORT` | No; por defecto `5432` | `5432` |
+| `DB_NAME` | Sí | `coursehub` |
+| `DB_USER` | Sí | `postgres` |
+| `DB_PASSWORD` | Sí; puede estar vacía | `tu_clave` |
+| `PORT` | No; por defecto `3000` | `3000` |
+| `NODE_ENV` | No; por defecto `development` | `development` |
 
-2. Define estas variables de entorno para la conexión a PostgreSQL:
+Antes de iniciar el proyecto, copia `.env.example` a `.env` en la raíz del repositorio y actualiza `DB_USER` y `DB_PASSWORD` con las credenciales de tu PostgreSQL:
 
-   ```env
-   DATABASE_HOST=localhost
-   DATABASE_PORT=5432
-   DATABASE_USER=postgres
-   DATABASE_PASSWORD=tu_clave
-   DATABASE_NAME=coursehub
-   PORT=3000
-   NODE_ENV=development
-   ```
+## Inicio en desarrollo
 
-   En desarrollo, TypeORM sincroniza el esquema automáticamente. En otros entornos, la sincronización automática queda desactivada.
+Instala las dependencias e inicia la API:
 
-3. Inicia la API:
+```bash
+npm install
+npm run start:dev
 
-   ```bash
-   npm run start:dev
-   ```
 
 La API escucha en `http://localhost:3000` por defecto. El puerto se puede cambiar mediante `PORT`.
 
-## Rutas
+## Endpoints y consultas de la Semana 6
+
+Los ejemplos usan `curl` y presuponen que la API está ejecutándose localmente en el puerto `3000`.
 
 ### Cursos
 
@@ -68,9 +67,11 @@ Parámetros opcionales de `GET /courses`:
 | `sortBy` | Campo de orden: `id`, `title` o `level`; por defecto `id`. |
 | `order` | Dirección `ASC` o `DESC`; por defecto `ASC`. |
 
-La respuesta de listado contiene `items` y `meta`, con `total`, `page`, `limit` y `totalPages`.
+La respuesta de listado contiene `items` y `meta`, con `total`, `page`, `limit` y `totalPages`. Consulta de ejemplo con filtro, paginación y ordenamiento:
 
-Ejemplo: `GET /courses?level=beginner&page=1&limit=10&sortBy=title&order=ASC`.
+```bash
+curl "http://localhost:3000/courses?level=beginner&page=1&limit=10&sortBy=title&order=ASC"
+```
 
 Ejemplo de cuerpo para crear un curso:
 
@@ -92,7 +93,13 @@ Ejemplo de cuerpo para crear un curso:
 | `PATCH` | `/estudiantes/:id/estado` | Alterna el estado activo/inactivo. |
 | `DELETE` | `/estudiantes/:id` | Elimina un estudiante activo. |
 
-Parámetros opcionales de `GET /estudiantes`: `career`, `semester` e `isActive` (`true` o `false`). No se permite eliminar estudiantes inactivos y el correo electrónico debe ser único.
+Parámetros opcionales de `GET /estudiantes`: `career`, `semester` e `isActive` (`true` o `false`). Ejemplo de consulta combinando filtros:
+
+```bash
+curl "http://localhost:3000/estudiantes?career=Ingenieria&semester=3&isActive=true"
+```
+
+No se permite eliminar estudiantes inactivos y el correo electrónico debe ser único.
 
 ### Inscripciones
 
@@ -115,9 +122,11 @@ Parámetros opcionales de `GET /enrollments`:
 | `page` | Página solicitada; empieza en `1` y por defecto es `1`. |
 | `limit` | Resultados por página, entre `1` y `50`; por defecto `10`. |
 
-La búsqueda textual utiliza `ILIKE` de PostgreSQL. La respuesta de listado contiene `items` y `meta`, con `total`, `page` y `limit`.
+La búsqueda textual utiliza `ILIKE` de PostgreSQL. La respuesta de listado contiene `items` y `meta`, con `total`, `page` y `limit`. Ejemplo de consulta por nombre o título, limitada a estudiantes activos y paginada:
 
-Ejemplo: `GET /enrollments?search=ana&activeOnly=true&page=1&limit=10`.
+```bash
+curl "http://localhost:3000/enrollments?search=ana&activeOnly=true&page=1&limit=10"
+```
 
 Ejemplo de cuerpo para crear una inscripción:
 

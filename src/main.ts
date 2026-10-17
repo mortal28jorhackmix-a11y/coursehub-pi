@@ -1,5 +1,7 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { DataSource } from 'typeorm';
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
@@ -13,7 +15,15 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000);
+  const config = app.get(ConfigService);
+  const port = config.getOrThrow<number>('PORT');
+  await app.listen(port);
+
+  const dataSource = app.get(DataSource);
+  Logger.log(
+    `NODE_ENV=${config.get('NODE_ENV')} | synchronize=${dataSource.options.synchronize}`,
+    'Ambiente',
+  );
 }
 
 bootstrap();
