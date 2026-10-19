@@ -75,13 +75,10 @@ curl "http://localhost:3000/courses?level=beginner&page=1&limit=10&sortBy=title&
 
 Ejemplo de cuerpo para crear un curso:
 
-```json
 {
   "title": "Introducción a NestJS",
   "level": "beginner"
 }
-```
-
 ### Estudiantes
 
 | Método | Ruta | Descripción |
@@ -124,7 +121,6 @@ Parámetros opcionales de `GET /enrollments`:
 
 La búsqueda textual utiliza `ILIKE` de PostgreSQL. La respuesta de listado contiene `items` y `meta`, con `total`, `page` y `limit`. Ejemplo de consulta por nombre o título, limitada a estudiantes activos y paginada:
 
-```bash
 curl "http://localhost:3000/enrollments?search=ana&activeOnly=true&page=1&limit=10"
 ```
 
