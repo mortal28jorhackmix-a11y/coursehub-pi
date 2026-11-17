@@ -29,8 +29,20 @@ La aplicación requiere estas variables para conectarse a PostgreSQL:
 | `DB_PASSWORD` | Sí; puede estar vacía | `tu_clave` |
 | `PORT` | No; por defecto `3000` | `3000` |
 | `NODE_ENV` | No; por defecto `development` | `development` |
+| `JWT_SECRET` | Sí; mínimo 32 caracteres | Secreto generado localmente |
+| `JWT_EXPIRES_IN` | No; por defecto `1h` | `1h` |
 
-Antes de iniciar el proyecto, copia `.env.example` a `.env` en la raíz del repositorio y actualiza `DB_USER` y `DB_PASSWORD` con las credenciales de tu PostgreSQL:
+Antes de iniciar el proyecto, crea un archivo `.env` en la raíz con estas variables. Usa un secreto aleatorio propio para `JWT_SECRET` y actualiza las credenciales de PostgreSQL:
+
+```dotenv
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=coursehub
+DB_USER=postgres
+DB_PASSWORD=tu_clave
+JWT_SECRET=usa_un_secreto_aleatorio_de_32_caracteres_o_mas
+JWT_EXPIRES_IN=1h
+```
 
 ## Inicio en desarrollo
 
@@ -39,6 +51,7 @@ Instala las dependencias e inicia la API:
 ```bash
 npm install
 npm run start:dev
+```
 
 
 La API escucha en `http://localhost:3000` por defecto. El puerto se puede cambiar mediante `PORT`.
@@ -75,10 +88,15 @@ curl "http://localhost:3000/courses?level=beginner&page=1&limit=10&sortBy=title&
 
 Ejemplo de cuerpo para crear un curso:
 
+```json
 {
   "title": "Introducción a NestJS",
   "level": "beginner"
 }
+```
+
+La creación y actualización de cursos requieren un token Bearer de un usuario `teacher` o `admin`; cada docente solo puede actualizar sus propios cursos. La eliminación requiere el rol `admin`.
+
 ### Estudiantes
 
 | Método | Ruta | Descripción |
@@ -121,6 +139,7 @@ Parámetros opcionales de `GET /enrollments`:
 
 La búsqueda textual utiliza `ILIKE` de PostgreSQL. La respuesta de listado contiene `items` y `meta`, con `total`, `page` y `limit`. Ejemplo de consulta por nombre o título, limitada a estudiantes activos y paginada:
 
+```bash
 curl "http://localhost:3000/enrollments?search=ana&activeOnly=true&page=1&limit=10"
 ```
 
@@ -150,3 +169,13 @@ La aplicación aplica un `ValidationPipe` global que transforma los valores de e
 | `npm run test:e2e` | Ejecuta las pruebas end-to-end. |
 | `npm run lint` | Analiza el código fuente y las pruebas. |
 | `npm run format` | Formatea los archivos TypeScript de `src/` y `test/`. |
+
+
+sesion 20 
+ (Semana 10)
+
+Esta API implementa una estrategia de **defensa en profundidad** que incluye:
+- **CORS:** Restringido a los orígenes autorizados del cliente web en `src/main.ts`.
+- **Rate Limiting:** Protección global mediante `@nestjs/throttler` (20 peticiones por minuto por defecto) y un límite estricto de **5 intentos por minuto** en el endpoint de autenticación (`POST /auth/login`) para prevenir ataques de fuerza bruta[cite: 1, 4].
+- **Validación y Tipos:** Uso estricto de DTOs con `ValidationPipe` para rechazar cuerpos malformados o datos no permitidos.
+- **HTTPS y Producción:** En entornos de producción, la terminación TLS (HTTPS) debe configurarse en el balanceador de carga o proxy inverso para proteger los tokens Bearer y credenciales en tránsito[cite: 1]. Las credenciales y secretos (`JWT_SECRET`, credenciales de base de datos) se gestionan exclusivamente mediante variables de entorno validadas con Joi.

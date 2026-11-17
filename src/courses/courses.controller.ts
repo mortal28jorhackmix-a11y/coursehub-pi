@@ -4,13 +4,22 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto.js';
+import { UpdateCourseDto } from './dto/update-course.dto.js';
 import { CoursesService } from './courses.service.js';
 import { CoursesQueryDto } from './dto/courses-query.dto.js';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { RolesGuard } from '../auth/roles.guard.js';
+import { Roles } from '../auth/roles.decorator.js';
+import { CurrentUser } from '../auth/current-user.decorator.js';
+import type { AuthenticatedUser } from '../auth/types/authenticated-user.type.js';
+import { UserRole } from '../users/user-role.enum.js';
 
 @Controller('courses')
 export class CoursesController {
@@ -22,25 +31,35 @@ export class CoursesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.coursesService.findOne(id);
   }
 
   @Post()
-  create(@Body() createCourseDto: CreateCourseDto) {
-    return this.coursesService.create(createCourseDto);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.TEACHER, UserRole.ADMIN)
+  create(
+    @Body() createCourseDto: CreateCourseDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.coursesService.create(createCourseDto, actor);
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.TEACHER, UserRole.ADMIN)
   update(
-    @Param('id') id: string,
-    @Body() body: { title?: string; level?: string },
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateCourseDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ) {
-    return this.coursesService.update(id, body);
+    return this.coursesService.update(id, dto, actor);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.coursesService.remove(id);
   }
 }
