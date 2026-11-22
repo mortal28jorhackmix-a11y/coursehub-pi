@@ -1,14 +1,17 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';                        // 1. Importar APP_GUARD
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import Joi from 'joi';
 import { CoursesModule } from './courses/courses.module.js';
 import { EnrollmentsModule } from './enrollments/enrollments.module.js';
 import { EstudianteModule } from './estudiante/estudiante.module.js';
 import { UsersModule } from './users/users.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware.js';
+import { HttpErrorFilter } from './common/filters/http-error.filter.js';
+import { TimingInterceptor } from './common/interceptors/timing.interceptor.js';
 
 @Module({
   imports: [
@@ -40,7 +43,7 @@ import { AuthModule } from './auth/auth.module.js';
         synchronize: config.getOrThrow<string>('NODE_ENV') === 'development',
       }),
     }),
-    ThrottlerModule.forRoot([{ttl: 60_000,limit: 20,},]),
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 20 }]),
     CoursesModule,
     EstudianteModule,
     EnrollmentsModule,
@@ -48,11 +51,17 @@ import { AuthModule } from './auth/auth.module.js';
     AuthModule,
   ],
   providers: [
-    // 3. Aplicar el guardia de Throttler de forma global en la aplicación
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    // Guard global de Throttler (Sesión 20)
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    // Filter global de errores (Sesión 21)
+    { provide: APP_FILTER, useClass: HttpErrorFilter },
+    // Interceptor global de tiempo de respuesta (Sesión 21)
+    { provide: APP_INTERCEPTOR, useClass: TimingInterceptor },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  // Middleware de registro para todas las rutas (Sesión 21)
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestLoggerMiddleware).forRoutes('*path');
+  }
+}
