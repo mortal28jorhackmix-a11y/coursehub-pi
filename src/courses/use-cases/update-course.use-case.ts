@@ -1,15 +1,10 @@
-import {
-  ForbiddenException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import {ForbiddenException,Inject,Injectable,NotFoundException,} from '@nestjs/common';
 import { COURSE_REPOSITORY } from '../repositories/course.repository.js';
 import type { CourseRepository } from '../repositories/course.repository.js';
 import type { UpdateCourseDto } from '../dto/update-course.dto.js';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type.js';
 import { UserRole } from '../../users/user-role.enum.js';
-
+  
 @Injectable()
 export class UpdateCourseUseCase {
   constructor(
