@@ -304,7 +304,7 @@ Ejecuta todas las pruebas unitarias con:
 npm test
 
 
-
+#SESION 25 Y 26
 ## Verificaciones locales
 
 Requisitos: Node.js 22, npm y PostgreSQL.
