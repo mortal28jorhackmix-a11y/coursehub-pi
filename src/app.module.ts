@@ -28,6 +28,7 @@ import { TimingInterceptor } from './common/interceptors/timing.interceptor.js';
         DB_USER: Joi.string().required(),
         DB_PASSWORD: Joi.string().allow('').required(),
       }),
+      envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -40,7 +41,9 @@ import { TimingInterceptor } from './common/interceptors/timing.interceptor.js';
         password: config.getOrThrow<string>('DB_PASSWORD'),
         database: config.getOrThrow<string>('DB_NAME'),
         autoLoadEntities: true,
-        synchronize: config.getOrThrow<string>('NODE_ENV') === 'development',
+        synchronize: ['development', 'test'].includes(
+          config.getOrThrow<string>('NODE_ENV'),
+        ),
       }),
     }),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 20 }]),

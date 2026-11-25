@@ -302,3 +302,20 @@ Ejecuta todas las pruebas unitarias con:
 
 ```bash
 npm test
+
+
+#SESION 25 Y 26
+## Verificaciones locales
+
+Requisitos: Node.js 22, npm y PostgreSQL.
+
+Para ejecutar las pruebas e2e, crea en PostgreSQL una base exclusiva llamada `coursehub_test` y configura `.env.test` en la raíz del proyecto con las credenciales locales. El archivo debe incluir `NODE_ENV=test` y `DB_NAME=coursehub_test`. No hay qye subir `.env.test` al repositorio; porque ya esta en `.gitignore`.
+
+en la raíz del proyecto, ejecutar:
+
+```bash
+npm ci
+npm run lint
+npm test
+npm run test:e2e
+npm run build
