@@ -16,7 +16,7 @@ describe('AppController', () => {
 
   describe('root', () => {
     it('should return the API status message', () => {
-      expect(appController.getHello()).toBe('fallo controlado');
+      expect(appController.getHello()).toBe('coursehub-pi esta en linea:!');
     });
   });
 });
