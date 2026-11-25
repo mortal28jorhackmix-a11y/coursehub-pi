@@ -1,0 +1,29 @@
+name: quality
+
+on: [push, pull_request]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Revisar código
+        run: npm run lint
+
+      - name: Ejecutar pruebas
+        run: npm test
+
+      - name: Compilar
+        run: npm run build
